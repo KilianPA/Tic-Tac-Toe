@@ -1,167 +1,187 @@
-/*********************
-* Auteur : Romain SEMLER
-* Fichier : tic-tac-toe.js
-* Date : 07/09/2014
-**********************/
-function estValide(button)
-{
-     return button.innerHTML.length == 0;
+let currentPlayer = null;
+let gameStatus = 0;
+let arrayGame = Array.apply(null, Array(9)).map(function () {})
+
+const rows = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8]
+]
+
+const cols = [
+    [0,3,6],
+    [1,4,7],
+    [2,5,8]
+]
+const diagonal = [
+    [0,4,8],
+    [2,4,6]
+]
+
+const priorityPos = [
+    4,0,2,6,8
+]
+
+
+init()
+function init () {
+    let index = 0
+    gameStatus = 1
+    let gameBoard = document.getElementById('game')
+    for (let i = 0; i < 3; i++) {
+        let div = document.createElement('div');
+        for (let y = 0; y < 3; y++) {
+            let button = document.createElement('button');
+            button.id = index
+            button.className = 'btn btn-secondary'
+            div.appendChild(button);
+            index++
+        }
+        gameBoard.appendChild(div)
+    }
+    let buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('click',  function () {
+                setShape(this.id)
+        })
+    })
 }
 
-function setSymbol(btn, symbole)
-{
-     btn.innerHTML = symbole;
+function setShape (id) {
+    if (gameStatus) {
+        if (arrayGame[this.id] === undefined) {
+            arrayGame[id] = currentPlayer === 'O' ? 'X' : 'O'
+            currentPlayer = currentPlayer === 'O' ? 'X' : 'O'
+            renderShape()
+            if (currentPlayer === 'O') {
+                computePlay()
+            }
+        }
+    }
 }
 
-function rechercherVainqueur(pions, joueurs, tour)
-{
-     if (pions[0].innerHTML == joueurs[tour] &&
-         pions[1].innerHTML == joueurs[tour] &&
-         pions[2].innerHTML == joueurs[tour])
-      {
-        pions[0].style.backgroundColor = "#5CB85C";
-        pions[1].style.backgroundColor = "#5CB85C";
-        pions[2].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[3].innerHTML == joueurs[tour] &&
-          pions[4].innerHTML == joueurs[tour] &&
-          pions[5].innerHTML == joueurs[tour])
-      {
-        pions[3].style.backgroundColor = "#5CB85C";
-        pions[4].style.backgroundColor = "#5CB85C";
-        pions[5].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[6].innerHTML == joueurs[tour] &&
-          pions[7].innerHTML == joueurs[tour] &&
-          pions[8].innerHTML == joueurs[tour])
-      {
-        pions[6].style.backgroundColor = "#5CB85C";
-        pions[7].style.backgroundColor = "#5CB85C";
-        pions[8].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[0].innerHTML == joueurs[tour] &&
-          pions[3].innerHTML == joueurs[tour] &&
-          pions[6].innerHTML == joueurs[tour])
-      {
-        pions[0].style.backgroundColor = "#5CB85C";
-        pions[3].style.backgroundColor = "#5CB85C";
-        pions[6].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[1].innerHTML == joueurs[tour] &&
-          pions[4].innerHTML == joueurs[tour] &&
-          pions[7].innerHTML == joueurs[tour])
-      {
-        pions[1].style.backgroundColor = "#5CB85C";
-        pions[4].style.backgroundColor = "#5CB85C";
-        pions[7].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[2].innerHTML == joueurs[tour] &&
-          pions[5].innerHTML == joueurs[tour] &&
-          pions[8].innerHTML == joueurs[tour])
-      {
-        pions[2].style.backgroundColor = "#5CB85C";
-        pions[5].style.backgroundColor = "#5CB85C";
-        pions[8].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[0].innerHTML == joueurs[tour] &&
-          pions[4].innerHTML == joueurs[tour] &&
-          pions[8].innerHTML == joueurs[tour])
-      {
-        pions[0].style.backgroundColor = "#5CB85C";
-        pions[4].style.backgroundColor = "#5CB85C";
-        pions[8].style.backgroundColor = "#5CB85C";
-        return true;
-      }
-
-      if (pions[2].innerHTML == joueurs[tour] &&
-          pions[4].innerHTML == joueurs[tour] &&
-          pions[6].innerHTML == joueurs[tour])
-      {
-        pions[2].style.backgroundColor = "#5CB85C";
-        pions[4].style.backgroundColor = "#5CB85C";
-        pions[6].style.backgroundColor = "#5CB85C";
-        return true;
-      }
+function renderShape () {
+    arrayGame.forEach((element, index) => {
+        if (element) {
+            let btn = document.getElementById(index)
+            btn.innerHTML = element
+        }
+    })
+    checkVictory()
 }
 
-function matchNul(pions)
-{
-     for (var i = 0, len = pions.length; i < len; i++)
-     {
-         if (pions[i].innerHTML.length == 0)
-              return false;
-     }
-
-     return true;
+function checkVictory () {
+    checkPos(rows)
+    checkPos(cols)
+    checkPos(diagonal)
 }
 
-var Afficheur = function(element)
-{
-     var affichage = element;
+function computePlay () {
+    let nextArrPos = []
+    let nextPos = null
+    nextArrPos = nextArrPos.concat(calculateNextPos(rows)).concat(calculateNextPos(cols)).concat(calculateNextPos(diagonal))
+    if (nextArrPos.length) {
+        nextPos = nextArrPos[0].pos
+        let loosePos = nextArrPos.filter(pos => pos.loose);
+        if (loosePos.length) {
+            nextPos = loosePos[0].pos
+        }
+        let winPos = nextArrPos.filter(pos => pos.win);
+        if (winPos.length) {
+            nextPos = winPos[0].pos
+        }
 
-     function setText(message)
-     {
-         affichage.innerHTML = message;
-     }
-
-     return {sendMessage : setText};
+    } else {
+        nextArrPos = priorityPos
+        let availablePos = getAvailablePos()
+        nextArrPos = nextArrPos.filter(e => availablePos.indexOf(e) !== -1);
+        if (nextArrPos.length) {
+            nextPos = nextArrPos[0]
+        }
+    }
+    if (!nextPos) {
+        nextPos = getAvailablePos()[0]
+    }
+    setTimeout(() => {
+        setShape(nextPos)
+    }, 1000)
 }
 
-function main()
-{
-     var pions = document.querySelectorAll("#Jeu button");
-     var joueurs = ['X', 'O'];
-     var tour = 0;
-     var jeuEstFini = false;
-     var afficheur = new Afficheur(document.querySelector("#StatutJeu"));
-     afficheur.sendMessage("Le jeu peut commencer ! <br /> Joueur " + joueurs[tour] + " c'est votre tour.");
-     for (var i = 0, len = pions.length; i < len; i++)
-     {
-         pions[i].addEventListener("click", function()
-         {
-              if (jeuEstFini)
-                  return;
-
-              if (!estValide(this))
-              {
-                  afficheur.sendMessage("Case occupée ! <br />Joueur " + joueurs[tour] + " c'est toujours à vous !");
-
-              }
-              else
-              {
-                  setSymbol(this, joueurs[tour]);
-                  jeuEstFini = rechercherVainqueur(pions, joueurs, tour);
-
-                  if(jeuEstFini)
-                  {
-                      afficheur.sendMessage("Le joueur " + joueurs[tour] + " a gagné ! <br /> <a href=\"./\">Rejouer</a>");
-                      return;
-                  }
-
-                  if (matchNul(pions))
-                  {
-                      afficheur.sendMessage("Match Nul ! <br/> <a href=\"./\">Rejouer</a>");
-                      return;
-                  }
-
-                  tour++;
-                  tour = tour % 2;
-                  afficheur.sendMessage("Joueur " + joueurs[tour] + " c'est à vous !");
-              }
-         });
-     }
+function getAvailablePos () {
+    let arrPos = []
+    arrayGame.forEach((element, index) => {
+        if (element === undefined) {
+            arrPos.push(index)
+        }
+    })
+    return arrPos
 }
 
-main();
+function checkPos (rows) {
+    rows.forEach(row => {
+        let playerInit = arrayGame[row[0]]
+        let samePlayer = true
+        for (let pos in row) {
+            let player = arrayGame[row[pos]]
+            if (player === undefined) {
+                samePlayer = false
+                continue;
+            }
+            if (player !== playerInit) {
+                samePlayer = false
+            }
+        }
+        if (samePlayer) {
+            gameStatus = 0
+            document.getElementById('gameStatus').innerHTML = 'Joueur ' + playerInit + ' a gagné'
+            setTimeout(() => {
+                resetGame()
+            }, 2000)
+        }
+    })
+}
+
+function calculateNextPos (rows) {
+    let playerTarget = 'O'
+    let iaPlayer = 'X'
+    let nextArrPos = []
+    rows.forEach(row => {
+        let playerPosCount = 0;
+        let playerIaPosCount = 0;
+        let nextPos;
+        for (let pos in row) {
+            let player = arrayGame[row[pos]]
+            if (player === undefined) {
+                nextPos = row[pos]
+            }
+            if (player === iaPlayer) {
+                playerIaPosCount++
+            }
+            if (player === playerTarget) {
+                playerPosCount++
+            }
+            if (playerIaPosCount === 2 && nextPos) {
+                nextArrPos.push({win: true, pos: nextPos})
+            }
+            if (playerPosCount === 2 && nextPos) {
+                nextArrPos.push({loose:true, pos: nextPos})
+            }
+            if (playerIaPosCount > 0 && nextPos) {
+                nextArrPos.push({win:false, pos: nextPos})
+            }
+        }
+    })
+    return nextArrPos
+}
+
+
+document.getElementById('restart').addEventListener('click', function () {
+    resetGame()
+})
+
+function  resetGame() {
+    arrayGame = Array.apply(null, Array(9)).map(function () {})
+    document.getElementById('game').innerHTML = ''
+    currentPlayer =  null
+    init()
+}
